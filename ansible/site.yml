@@ -1,0 +1,53 @@
+---
+- name: Configure web servers
+  hosts: webservers
+  become: true
+
+  vars:
+    app_dir: /var/www/ansible-app
+
+  tasks:
+    - name: Install required packages
+      ansible.builtin.apt:
+        name:
+          - nginx
+          - curl
+          - git
+        state: present
+        update_cache: true
+
+    - name: Create application directory
+      ansible.builtin.file:
+        path: "{{ app_dir }}"
+        state: directory
+        mode: "0755"
+
+    - name: Deploy index page from template
+      ansible.builtin.template:
+        src: templates/index.html.j2
+        dest: "{{ app_dir }}/index.html"
+        mode: "0644"
+
+    - name: Configure nginx site
+      ansible.builtin.copy:
+        dest: /etc/nginx/sites-available/default
+        content: |
+          server {
+            listen 8088;
+            root {{ app_dir }};
+            index index.html;
+          }
+        mode: "0644"
+      notify: Restart nginx
+
+    - name: Ensure nginx is running and enabled
+      ansible.builtin.service:
+        name: nginx
+        state: started
+        enabled: true
+
+  handlers:
+    - name: Restart nginx
+      ansible.builtin.service:
+        name: nginx
+        state: restarted

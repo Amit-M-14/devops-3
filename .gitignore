@@ -1,0 +1,16 @@
+# Ignore Terraform provider binaries & plugins (removes the 20+ MiB files)
+**/.terraform/
+
+# Ignore local Terraform state files
+*.tfstate
+*.tfstate.*
+
+# Ignore Terraform crash logs and local variable overrides
+crash.log
+crash.*.log
+*.tfvars
+*.tfvars.json
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
